@@ -1,16 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:netflix_clone/api/api.dart';
 
 import 'package:netflix_clone/core/constants.dart';
+import 'package:netflix_clone/models/movie.dart';
 import 'package:netflix_clone/presentation/home/widgets/background_card.dart';
+import 'package:netflix_clone/presentation/home/widgets/category_slider.dart';
 import 'package:netflix_clone/presentation/home/widgets/number_title_card.dart';
 
-import 'package:netflix_clone/presentation/widgets/main_title_card.dart';
+//import 'package:netflix_clone/presentation/widgets/main_title_card.dart';
 
-ValueNotifier<bool> scrollNotifier = ValueNotifier(true); 
+ValueNotifier<bool> scrollNotifier = ValueNotifier(true);
 
-class ScreenHome extends StatelessWidget {
+class ScreenHome extends StatefulWidget {
   const ScreenHome({super.key});
+
+  @override
+  State<ScreenHome> createState() => _ScreenHomeState();
+}
+
+late Future<List<Movie>> trendingMovies;
+late Future<List<Movie>> top10movies;
+late Future<List<Movie>> tenseDrama;
+late Future<List<Movie>> southIndianCinemas;
+
+class _ScreenHomeState extends State<ScreenHome> {
+  @override
+  void initState() {
+    super.initState();
+    trendingMovies = Api().getTrendingMovies();
+    top10movies = Api().getTop10Movies();
+    tenseDrama = Api().getTenseDrama();
+    southIndianCinemas = Api().getSouthIndianCinemas();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,24 +53,48 @@ class ScreenHome extends StatelessWidget {
         child: Stack(
           children: [
             ListView(
-              children: const [
-                BackgroundCard(),
-                MainTitleCard(title: 'Released in the past year'),
-                kheight,
-                MainTitleCard(
-                  title: 'Trending Now',
+              children: [
+                const BackgroundCard(),
+                categorySlider(
+                    context: context,
+                    categorey: trendingMovies,
+                    title: 'Trending Movies'),
+                SizedBox(
+                  child: FutureBuilder(
+                    future: top10movies,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child:
+                              Text('Errror  ===${snapshot.error.toString()}'),
+                        );
+                      } else if (snapshot.hasData) {
+                        return NumberTitleCard(
+                          snapshot: snapshot,
+                        );
+                      } else {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    },
+                  ),
                 ),
                 kheight,
-                NumberTitleCard(),
+                categorySlider(
+                    context: context,
+                    categorey: tenseDrama,
+                    title: 'Tense Drama '),
                 kheight,
-                MainTitleCard(title: 'Tense Drama'),
-                kheight,
-                MainTitleCard(title: 'South Indian Cinemas')
+                categorySlider(
+                    context: context,
+                    categorey: southIndianCinemas,
+                    title: 'South Indian Cinemas')
               ],
             ),
             scrollNotifier.value == true
                 ? AnimatedContainer(
-                  duration: Duration(milliseconds: 1000),
+                    duration: const Duration(milliseconds: 1000),
                     width: double.infinity,
                     height: 80,
                     color: Colors.black.withOpacity(0.6),
@@ -59,7 +105,9 @@ class ScreenHome extends StatelessWidget {
                           child: Row(
                             children: [
                               Image.network(
+                                // 'https://m.media-amazon.com/images/M/MV5BMDZkYmVhNjMtNWU4MC00MDQxLWE3MjYtZGMzZWI1ZjhlOWJmXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg'
                                 'https://images.ctfassets.net/4cd45et68cgf/Rx83JoRDMkYNlMC9MKzcB/2b14d5a59fc3937afd3f03191e19502d/Netflix-Symbol.png?w=700&h=456',
+
                                 height: 40,
                                 width: 60,
                               ),
@@ -75,12 +123,23 @@ class ScreenHome extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [ 
-                          Text('TV Show',style:kHomeTitleText,), 
-                          Text('Movies',style: kHomeTitleText,),
-                          Text('Category',style: kHomeTitleText,) 
-                        ],)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              'TV Show',
+                              style: kHomeTitleText,
+                            ),
+                            Text(
+                              'Movies',
+                              style: kHomeTitleText,
+                            ),
+                            Text(
+                              'Category',
+                              style: kHomeTitleText,
+                            )
+                          ],
+                        )
                       ],
                     ),
                   )

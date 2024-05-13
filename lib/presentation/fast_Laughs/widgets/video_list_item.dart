@@ -1,17 +1,48 @@
 import 'package:flutter/material.dart';
 
 import 'package:netflix_clone/core/colors/colors.dart';
+import 'package:video_player/video_player.dart';
 
-class VideoListItem extends StatelessWidget {
-  const VideoListItem({super.key, required this.index});
+class VideoListItem extends StatefulWidget {
+  const VideoListItem({super.key, required this.index, required this.videoUrl});
   final int index;
+  final String videoUrl;
+  @override
+  State<VideoListItem> createState() => _VideoListItemState();
+}
+
+class _VideoListItemState extends State<VideoListItem> {
+  late VideoPlayerController controller;
+  @override
+  void initState() {
+    final url = Uri.parse(widget.videoUrl);
+    controller = VideoPlayerController.networkUrl(url)
+      ..initialize().then((_) {
+        setState(() {
+          controller.play();
+        });
+      });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(
-          color: Colors.accents[index % Colors.accents.length],
+        SizedBox(
+          height: double.infinity,
+          child: controller.value.isInitialized
+              ? AspectRatio(
+                  aspectRatio: controller.value.aspectRatio,
+                  child: VideoPlayer(controller),
+                )
+              : const Center(
+                  child: CircularProgressIndicator(),
+                ),
         ),
+        // Container(
+        //   color: Colors.accents[widget.index % Colors.accents.length],
+        // ),
         Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
@@ -57,6 +88,11 @@ class VideoListItem extends StatelessWidget {
         )
       ],
     );
+  }
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
   }
 }
 

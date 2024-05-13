@@ -1,13 +1,14 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:netflix_clone/core/colors/colors.dart';
 import 'package:netflix_clone/core/constants.dart';
+import 'package:netflix_clone/models/movie.dart';
 
 class VideoWidget extends StatelessWidget {
   const VideoWidget({
-    super.key,
+    super.key,required this.movie
   });
-
+final Movie movie;
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -16,7 +17,8 @@ class VideoWidget extends StatelessWidget {
           height: 200,
           width: double.infinity,
           child: Image.network(
-            newAndHotTempImg,
+            // newAndHotTempImg,
+            '${Constants.imagePath}${movie.posterPath}',
             fit: BoxFit.cover,
           ),
         ),

@@ -1,11 +1,14 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
+// import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:netflix_clone/api/api.dart';
+// import 'package:flutter/widgets.dart';
 
 import 'package:netflix_clone/core/colors/colors.dart';
 import 'package:netflix_clone/core/constants.dart';
+import 'package:netflix_clone/models/movie.dart';
+// import 'package:netflix_clone/domain/api.dart';
 import 'package:netflix_clone/presentation/widgets/appbar_widget.dart';
 
 class ScreenDownloads extends StatelessWidget {
@@ -21,7 +24,7 @@ class ScreenDownloads extends StatelessWidget {
             title: 'Downloads',
           )),
       body: ListView.separated(
-        padding: EdgeInsets.all(10),
+        padding:const EdgeInsets.all(10),
         itemBuilder: (ctx,index)=>widgetList[index],
        separatorBuilder: (ctx,index)=>const SizedBox(height: 28,),
         itemCount: widgetList.length)
@@ -29,14 +32,25 @@ class ScreenDownloads extends StatelessWidget {
   }
 }
 
-class Section2 extends StatelessWidget {
-  Section2({super.key});
+class Section2 extends StatefulWidget {
+  const Section2({super.key});
 
+  @override
+  State<Section2> createState() => _Section2State();
+}
+
+class _Section2State extends State<Section2> {
   final List imageList = [
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxQ1RAjgG-GvD49MMO4F9bC_MT46ppGWsRwTjSiPglXQ&s',
     'https://i.pinimg.com/736x/32/71/0a/32710a972231979879576d792cf02e7c.jpg',
     'https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/941f52133698221.61c36c24decd0.jpg'
   ];
+  late Future<List<Movie>> posters;
+  @override
+  void initState() {
+    posters =Api().getTrendingMovies();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,38 +70,64 @@ class Section2 extends StatelessWidget {
           style: TextStyle(color: Colors.grey, fontSize: 16),
         ),
         kheight,
-        SizedBox(
-          width: size.width,
-          height: size.width,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.grey.withOpacity(0.5),
-                radius: size.width * 0.38,
-              ),
-              DownloadsImageWidgets(
-                imageList: imageList[0],
-                margin: EdgeInsets.only(left: 170,top:40),
-                angle: 25,
-                size: Size(size.width * 0.35, size.width * 0.55),
-              ),
-              DownloadsImageWidgets(
-                imageList: imageList[1],
-                margin: EdgeInsets.only(right: 170,top: 40),
-                angle: -25,
-                size: Size(size.width * 0.35, size.width * 0.55),
-              ),
-              DownloadsImageWidgets(
-                imageList: imageList[2],
-                radius: 10,
-                margin: EdgeInsets.only(bottom: 20,top: 30),
-                size: Size(size.width * 0.44, size.width * 0.6),
-              )
-            ],
-          ),
-        ),
+        SizedBox(child: FutureBuilder(future: posters, builder: (context, snapshot) {
+          if(snapshot.connectionState==ConnectionState.waiting){
+            return const CircularProgressIndicator();
+          }else if(snapshot.hasError){
+            return const Text('has error');
+          }else{
+             return PictureSection(size: size, imageList: imageList,);
+          }
+        },),),
+        
       ],
+    );
+  }
+}
+
+class PictureSection extends StatelessWidget {
+  const PictureSection({
+    super.key,
+    required this.size,
+    required this.imageList,
+  });
+
+  final Size size;
+  final List imageList;
+  
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size.width,
+      height: size.width,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CircleAvatar( 
+            backgroundColor: Colors.grey.withOpacity(0.5),
+            radius: size.width * 0.38,
+          ),
+          DownloadsImageWidgets(
+            imageList:imageList[0],
+            margin:const EdgeInsets.only(left: 170,top:40),
+            angle: 25,
+            size: Size(size.width * 0.35, size.width * 0.55),
+          ),
+          DownloadsImageWidgets(
+            imageList: imageList[1],
+            margin:const EdgeInsets.only(right: 170,top: 40),
+            angle: -25,
+            size: Size(size.width * 0.35, size.width * 0.55),
+          ),
+          DownloadsImageWidgets(
+            imageList: imageList[2],
+            radius: 10,
+            margin:const EdgeInsets.only(bottom: 20,top: 30),
+            size: Size(size.width * 0.44, size.width * 0.6),
+          )
+        ],
+      ),
     );
   }
 }
@@ -103,7 +143,11 @@ class Section3 extends StatelessWidget {
           width: double.infinity,
           child: MaterialButton(
             color: kButtonColorBlue,
-            onPressed: () {},
+            onPressed: () async{
+            //   print('hai');
+            // await  Api().getNumberFact('45'); 
+  
+            },
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             child: const Padding(

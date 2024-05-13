@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:netflix_clone/core/colors/colors.dart';
 import 'package:netflix_clone/core/constants.dart';
+
 import 'package:netflix_clone/presentation/home/widgets/custom_button_widget.dart';
 
 class BackgroundCard extends StatelessWidget {
   const BackgroundCard({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -15,7 +15,7 @@ class BackgroundCard extends StatelessWidget {
           height: 600,
           //color: kwhiteColor,
           decoration: const BoxDecoration(
-              image: DecorationImage(image: NetworkImage(kMainImg))),
+              image: DecorationImage(image: NetworkImage(imagepath))),
         ),
         Positioned(
           left: 0,
